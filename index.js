@@ -1,6 +1,7 @@
 var request = require('request');
 var cheerio = require('cheerio');
 var url     = require('url');
+var debug   = require('debug')('google-scraper');
 
 function search(options, callback) {
 
@@ -35,15 +36,11 @@ function search(options, callback) {
       return results.indexOf(result) === -1;
     });
 
-    newResults.forEach(function(result) {
-      callback(null, result);
-    });
+    results = results.concat(newResults);
 
     if(newResults.length === 0) {
-      return;
+      return callback(null, results);
     }
-
-    results = results.concat(newResults);
 
     if(!options.limit || results.length < options.limit) {
       params.start = results.length;
@@ -53,6 +50,7 @@ function search(options, callback) {
 
 
   function getPage(params, callback) {
+    debug('Do request on google', params);
     session.get({
         uri: 'https://' + host + '/search',
         qs: params,
@@ -92,6 +90,9 @@ function search(options, callback) {
     var results = [];
     var $ = cheerio.load(body);
 
+    $('#resultStats').each(function(){
+      debug('Result count : %s', $(this).text());
+    });
     $('.g h3 a').each(function(i, elem) {
       var parsed = url.parse(elem.attribs.href, true);
       if (parsed.pathname === '/url') {
@@ -126,8 +127,11 @@ function search(options, callback) {
 
         // Send to solver
         solver.solve(res.body, function(err, id, solution) {
-          if(err) return callback(err);
-
+          if(err){
+            debug('GOT AN ERROR FROM SOLVER :', err);
+            return callback(err);
+          }
+          debug('Send request to solve captcha (%s)', baseUrl + '/sorry/' + formAction);
           // Try solution
           session.get({
               uri: baseUrl + '/sorry/' + formAction,
@@ -136,9 +140,15 @@ function search(options, callback) {
                 captcha: solution,
                 continue: continueUrl
               }
-            }, 
+            },
             function(err, res) {
-              if(res.statusCode !== 200) return callback(new Error('Captcha decoding failed'));
+              if(res.statusCode !== 200){
+                var err = new Error('Captcha check failed');
+                if(solver.report){
+                  solver.report(id, err);
+                }
+                return callback();
+              }
               callback(null, res.body);
             }
           );

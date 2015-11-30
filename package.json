@@ -7,17 +7,18 @@
   "main": "index.js",
   "dependencies": {
     "cheerio": "~0.13.1",
-    "request": "~2.33.0"
+    "request": "~2.33.0",
+    "debug": "~2.2.0"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/thibauts/node-google-search-scraper.git"
   },
   "keywords": [
-    "google", 
-    "search", 
-    "scraper", 
-    "decaptcher", 
+    "google",
+    "search",
+    "scraper",
+    "decaptcher",
     "captcha"
   ]
 }
