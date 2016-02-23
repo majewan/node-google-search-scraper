@@ -6,6 +6,7 @@ var debug   = require('debug')('google-scraper');
 function search(options, callback) {
 
   var session = request.defaults({ jar : true });
+
   var host = options.host || 'www.google.com';
   var solver = options.solver;
   var params = options.params || {};
@@ -39,24 +40,28 @@ function search(options, callback) {
     results = results.concat(newResults);
 
     if(newResults.length === 0) {
+      debug('No more results.', currentResults.length, results.length);
       return callback(null, results);
     }
 
-    if(!options.limit || results.length < options.limit) {
+    if(options.limit && results.length >= options.limit){
+      debug('Limit reached.');
+      return callback(null, results);
+    }else{
       params.start = results.length;
       getPage(params, onPage);
     }
   });
 
 
-  function getPage(params, callback) {
+  function getPage(params, callback, uri) {
     debug('Do request on google', params);
     session.get({
-        uri: 'https://' + host + '/search',
+        uri: uri || 'https://' + host + '/search',
         qs: params,
         followRedirect: false
-      }, 
-      function(err, res) {
+      },
+      function followRedirect(err, res) {
         if(err) return callback(err);
 
         if(res.statusCode === 302) {
@@ -69,15 +74,8 @@ function search(options, callback) {
             this.abort();
             return callback(err);
           } else {
-            session.get({
-              uri: res.headers.location,
-              qs: params,
-              followRedirect: false
-            }, function(err, res) {
-              if(err) return callback(err);
-              callback(null, res.body);
-            });
-            return;
+            debug('Google redirect your request to', res.headers.location);
+            return getPage(params, callback, res.headers.location);
           }
         }
 
