@@ -114,7 +114,9 @@ function search(options, callback) {
       if(err) return callback(err);
 
       var $ = cheerio.load(res.body);
+      // TODO adaptative form response
       var captchaId = $('input[name=id]').attr('value');
+      var captchaQ = $('input[name=q]').attr('value');
       var continueUrl = $('input[name=continue]').attr('value');
       var formAction = $('form').attr('action');
       var imgSrc = $('img').attr('src');
@@ -136,7 +138,8 @@ function search(options, callback) {
               qs: {
                 id: captchaId,
                 captcha: solution,
-                continue: continueUrl
+                continue: continueUrl,
+                q: captchaQ
               }
             },
             function(err, res) {
@@ -145,7 +148,7 @@ function search(options, callback) {
                 if(solver.report){
                   solver.report(id, err);
                 }
-                return callback();
+                return callback(err);
               }
               callback(null, res.body);
             }
