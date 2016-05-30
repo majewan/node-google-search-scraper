@@ -21,10 +21,10 @@ function search(options, callback) {
 
   getPage(params, function onPage(err, body) {
     if(err) {
-      if(err.code !== 'ECAPTCHA' || !solver) return callback(err);
+      if(err.code !== 'ECAPTCHA' || !solver) return callback(err, results);
 
       solveCaptcha(err.location, function(err, page) {
-        if(err) return callback(err);
+        if(err) return callback(err, results);
         onPage(null, page);
       });
 
@@ -33,13 +33,9 @@ function search(options, callback) {
 
     var currentResults = extractResults(body);
 
-    var newResults = currentResults.filter(function(result) {
-      return results.indexOf(result) === -1;
-    });
+    results = results.concat(currentResults);
 
-    results = results.concat(newResults);
-
-    if(newResults.length === 0) {
+    if(currentResults.length === 0) {
       debug('No more results.', currentResults.length, results.length);
       return callback(null, results);
     }
