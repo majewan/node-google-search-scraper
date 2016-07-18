@@ -30,12 +30,11 @@ var options = {
   limit: 10
 };
 
-scraper.search(options, function(err, url) {
-  // This is called for each result
+scraper.search(options, function(err, result) {
   if(err) throw err;
-  console.log(url)
+  console.log(result.urls);
 });
-``` 
+```
 
 Various options combined
 
@@ -51,10 +50,10 @@ var options = {
   params: {} // params will be copied as-is in the search URL query string
 };
 
-scraper.search(options, function(err, url) {
+scraper.search(options, function(err, result) {
   // This is called for each result
   if(err) throw err;
-  console.log(url)
+  console.log(result.url);
 });
 ```
 
@@ -62,33 +61,33 @@ Extract all results on edu sites for "information theory" and solve captchas alo
 
 ``` javascript
 var scraper = require('google-search-scraper');
-var DeathByCaptcha = require('deathbycaptcha');
+var DeathByCaptcha = require('deathbycaptcha4');
 
-var dbc = new DeathByCaptcha('username', 'password');
+DeathByCaptcha.credentials({ username: 'username', password: 'password' });
 
 var options = {
   query: 'site:edu "information theory"',
   age: 'y', // less than a year,
-  solver: dbc
+  solver: DeathByCaptcha
 };
 
-scraper.search(options, function(err, url) {
+scraper.search(options, function(err, result) {
   // This is called for each result
   if(err) throw err;
-  console.log(url)
+  console.log(result.urls);
 });
 ```
 
 You can easily plug your own solver, implementing a solve method with the following signature:
+We provide a shell solver implementation but require X with eog or similar tool.
 
 ```javascript
 var customSolver = {
   solve: function(imageData, callback) {
     // Do something with image data, like displaying it to the user
     // id is used by BDC to allow reporting solving errors and can be safely ignored here
-    var id = null; 
+    var id = null;
     callback(err, id, solutionText);
   }
 };
-``` 
-
+```

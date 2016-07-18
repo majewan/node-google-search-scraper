@@ -10,7 +10,10 @@ function search(options, callback) {
   var host = options.host || 'www.google.com';
   var solver = options.solver;
   var params = options.params || {};
-  var results = [];
+  var outputDatas = {
+    urls: [],
+    pages: []
+  };
 
   params.hl = params.hl || options.lang || 'en';
 
@@ -21,30 +24,31 @@ function search(options, callback) {
 
   getPage(params, function onPage(err, body) {
     if(err) {
-      if(err.code !== 'ECAPTCHA' || !solver) return callback(err, results);
+      if(err.code !== 'ECAPTCHA' || !solver) return callback(err, outputDatas);
 
       solveCaptcha(err.location, function(err, page) {
-        if(err) return callback(err, results);
+        if(err) return callback(err, outputDatas);
         onPage(null, page);
       });
 
       return;
     }
 
+    if(options.keepPages) outputDatas.pages.push(body);
     var currentResults = extractResults(body);
 
-    results = results.concat(currentResults);
+    outputDatas.urls = outputDatas.urls.concat(currentResults);
 
     if(currentResults.length === 0) {
-      debug('No more results.', currentResults.length, results.length);
-      return callback(null, results);
+      debug('No more results.', currentResults.length, outputDatas.urls.length);
+      return callback(null, outputDatas);
     }
 
-    if(options.limit && results.length >= options.limit){
+    if(options.limit && outputDatas.urls.length >= options.limit){
       debug('Limit reached.');
-      return callback(null, results);
+      return callback(null, outputDatas);
     }else{
-      params.start = results.length;
+      params.start = outputDatas.urls.length;
       getPage(params, onPage);
     }
   });
