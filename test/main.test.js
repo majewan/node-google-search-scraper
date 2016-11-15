@@ -1,15 +1,14 @@
 'use strict';
 
 var assert = require('assert'),
-    GoogleSearchScraper = require('..'),
-    Solver = require('../commandLineSolver.js');
+    GoogleSearchScraper = require('..');
 
 describe('GoogleSearchScraper', function() {
   describe('OptionLimit', function() {
 
     it('Without limit option', function(done){
       this.timeout(60000);
-      GoogleSearchScraper.search({ query : 'site:nodejs.org', solver: Solver }, function(err, result){
+      GoogleSearchScraper.search({ query : 'site:nodejs.org', solver: GoogleSearchScraper.commandLineSolver }, function(err, result){
         if(err){
           throw err;
         }
@@ -23,7 +22,7 @@ describe('GoogleSearchScraper', function() {
 
     it('With 20 limit results', function(done){
       this.timeout(30000);
-      GoogleSearchScraper.search({ query : 'site:wikipedia.fr', limit: 20 , solver: Solver }, function(err, result){
+      GoogleSearchScraper.search({ query : 'site:wikipedia.fr', limit: 20 , solver: GoogleSearchScraper.commandLineSolver }, function(err, result){
         if(err){
           throw err;
         }
@@ -38,11 +37,11 @@ describe('GoogleSearchScraper', function() {
 
     it('Without keepPages', function(done){
       this.timeout(30000);
-      GoogleSearchScraper.search({ query : 'site:nodejs.org', solver: Solver, limit: 10 }, function(err, result){
+      GoogleSearchScraper.search({ query : 'site:nodejs.org', solver: GoogleSearchScraper.commandLineSolver, limit: 10 }, function(err, result){
         if(err){
           throw err;
         }
-        assert.equal(result.pages.length, 0, 'Scraper should not return a page.');
+        assert.strictEqual(result.pages.length, 0, 'Scraper should not return a page.');
         assert.notEqual(result.urls.length, 0, 'Request site:nodejs.org can\'t have 0 results.');
         if(result.urls.length < 10){
           assert.fail(result.urls.length, 10, 'Request site:nodejs.org can\'t have less than 10 results.');
@@ -53,11 +52,11 @@ describe('GoogleSearchScraper', function() {
 
     it('With keepPages', function(done){
       this.timeout(30000);
-      GoogleSearchScraper.search({ query : 'site:nodejs.org', solver: Solver, limit: 10, keepPages: true }, function(err, result){
+      GoogleSearchScraper.search({ query : 'site:nodejs.org', solver: GoogleSearchScraper.commandLineSolver, limit: 10, keepPages: true }, function(err, result){
         if(err){
           throw err;
         }
-        assert.equal(result.pages.length, 1, 'Scraper should return a page.');
+        assert.strictEqual(result.pages.length, 1, 'Scraper should return a page.');
         assert.notEqual(result.urls.length, 0, 'Request site:nodejs.org can\'t have 0 results.');
         if(result.urls.length < 10){
           assert.fail(result.urls.length, 10, 'Request site:nodejs.org can\'t have less than 10 results.');
