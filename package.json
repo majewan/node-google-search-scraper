@@ -6,9 +6,9 @@
   "license": "MIT",
   "main": "index.js",
   "dependencies": {
-    "cheerio": "~0.13.1",
-    "request": "~2.33.0",
-    "debug": "~2.2.0"
+    "cheerio": "^0.13.1",
+    "request": "^2.88.0",
+    "debug": "^2.2.0"
   },
   "repository": {
     "type": "git",
