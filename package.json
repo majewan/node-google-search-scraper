@@ -7,8 +7,12 @@
   "main": "index.js",
   "dependencies": {
     "cheerio": "^0.13.1",
-    "request": "^2.88.0",
-    "debug": "^2.2.0"
+    "debug": "^2.2.0",
+    "google-html-parser": "git+https://github.com/majewan/google-html-parser.git#50d1fe8",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "lodash": "^4.17.11"
   },
   "repository": {
     "type": "git",

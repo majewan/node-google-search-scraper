@@ -2,6 +2,7 @@ var request = require('request');
 var cheerio = require('cheerio');
 var url     = require('url');
 var debug   = require('debug')('google-scraper');
+var GoogleHtmlParser = require('google-html-parser');
 
 function search(options, callback) {
 
@@ -22,7 +23,7 @@ function search(options, callback) {
 
   params.start = 0;
 
-  getPage(params, function onPage(err, body) {
+  getPage(params, async function onPage(err, body) {
     if(err) {
       if(err.code !== 'ECAPTCHA' || !solver) return callback(err, outputDatas);
 
@@ -35,7 +36,7 @@ function search(options, callback) {
     }
 
     if(options.keepPages) outputDatas.pages.push(body);
-    var currentResults = extractResults(body);
+    var currentResults = await extractResults(body);
 
     outputDatas.urls = outputDatas.urls.concat(currentResults);
 
@@ -84,20 +85,15 @@ function search(options, callback) {
     );
   }
 
-  function extractResults(body) {
+  async function extractResults(body) {
     var results = [];
-    var $ = cheerio.load(body);
-
-    $('#resultStats').each(function(){
-      debug('Result count : %s', $(this).text());
-    });
-    $('.g h3 a').each(function(i, elem) {
-      var parsed = url.parse(elem.attribs.href, true);
+    const parsedResults = await GoogleHtmlParser.parse({ searchEngine: 'google' }, body);
+    parsedResults.results.forEach((result) => {
+      var parsed = url.parse(result.targetUrl, true);
       if (parsed.pathname === '/url') {
         results.push(parsed.query.q);
       }
     });
-
     return results;
   }
 
